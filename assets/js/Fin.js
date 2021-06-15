@@ -15,7 +15,7 @@ class Fin extends Phaser.Scene {
         let puntajefinal = this.add.text(0, 0, 'Score: ' + score,  { fontFamily: 'Arial', fontSize: 70, color: '#000000' });
         Phaser.Display.Align.In.Center(puntajefinal, this.add.zone(400, 300, 800, 600));
 
-        let restartButton = this.add.text(700, 500, 'Restart', { fontFamily: 'Arial', fontSize: 20, color: '#000000' })
+        let restartButton = this.add.text(700, 500, 'RestartWacho', { fontFamily: 'Arial', fontSize: 20, color: '#000000' })
         .setInteractive()
         .on('pointerdown', () => this.scene.start('juego') );
     }
