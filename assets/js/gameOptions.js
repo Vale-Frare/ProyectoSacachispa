@@ -14,12 +14,16 @@ let levelsData = [
 let boss = {
     body : null,
     head : null,
+    shoulderOffsetY: 0,
+    elbowOffsetY: -30,
+    handOffsetY: 0,
+    handOffsetX: -80,
     leftArm : {
         shoulder : null,
         elbow : null,
         hand : null,
     },
-    rigtArm : {
+    rightArm : {
         shoulder : null,
         elbow : null,
         hand : null,
@@ -84,7 +88,7 @@ window.onload = function () {
             }
         },
         pixelArt: true,
-        scene: [Inicio, Juego, Fin]
+        scene: [Inicio, Scene1, Fin]
     };
 
     game = new Phaser.Game(config);

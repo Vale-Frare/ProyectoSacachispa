@@ -1,155 +1,4 @@
 class Juego extends Phaser.Scene {
-    constructor() {
-        super('juego');
-    }
-
-    preload() {
-        this.load.image('atlas1', './assets/maps/atlas1.png');
-        this.load.image('mapafondo', './assets/maps/mapafondo.png');
-        this.load.tilemapTiledJSON('level1', './assets/maps/level1.json');
-    }
-
-    create() {
-        //  A simple background for our game
-        //this.add.image(400, 300, 'sky');
-
-        this.createGround();
-        this.loadMap();
-        this.createPlayer();
-        this.createBoss();
-
-        this.initColisiones();
-        this.initInputs();
-        this.initCamera();
-
-        this.loadLevelData(1);
-
-        boss.target = levelsData[0].spawn
-    }
-
-    update(time, delta) {   
-        if (gameOver) {
-            return;
-        }
-
-        if(cursors.left.isUp || cursors.right.isUp){
-        }
-
-        if (cursors.left.isDown) {
-            player.body.setVelocityX(-160);
-            playerLegs.anims.play('left', true);
-        }
-        else {
-            if (cursors.right.isDown) {
-                player.body.setVelocityX(160);
-                playerLegs.anims.play('right', true);
-            }   
-            else {
-                player.body.setVelocityX(0);
-                playerLegs.anims.play('turn');
-                playerTorso.anims.stop();
-            }
-        }
-
-        if (cursors.up.isDown) {
-            if (player.body.onFloor()) {
-                player.body.setVelocityY(-180);
-                playerLegs.anims.play('jump');
-                if (cursors.left.isDown) {
-                    playerTorso.anims.play('upLeftTorso', true);
-                }else if (cursors.right.isDown) {
-                    playerTorso.anims.play('upRightTorso', true);
-                }else {
-                    playerTorso.anims.play('upTorso', true);
-                }
-            }
-        }else {
-            if (cursors.down.isDown) {
-                if (cursors.left.isDown) {
-                    playerTorso.anims.play('downLeftTorso', true);
-                }else if (cursors.right.isDown) {
-                    playerTorso.anims.play('downRightTorso', true);
-                }else {
-                    playerTorso.anims.play('downTorso', true);
-                }
-            }
-            else {
-                if (cursors.left.isDown) {
-                    playerTorso.anims.play('leftTorso', true);
-                }
-                else if (cursors.right.isDown) {
-                    playerTorso.anims.play('rightTorso', true);
-                }
-            }
-        }
-
-        if (boss.moving) {
-            this.moveToTarget(boss.body, boss.target, 80, 250, false, 240);
-            this.moveToTarget(boss.leftArm.shoulder, {
-                x: boss.body.x - 85, 
-                y: boss.body.y - 130
-            }, 80, 5)
-            this.moveToTarget(boss.leftArm.elbow, {
-                x: boss.body.x - 185, 
-                y: boss.body.y - 70
-            }, 80, 5)
-            this.moveToTarget(boss.rigtArm.shoulder, {
-                x: boss.body.x + 85, 
-                y: boss.body.y - 130
-            }, 80, 5)
-            this.moveToTarget(boss.rigtArm.elbow, {
-                x: boss.body.x + 185, 
-                y: boss.body.y - 70
-            }, 80, 5)
-            this.moveToTarget(boss.head, {
-                x: boss.body.x, 
-                y: boss.body.y - 150
-            }, 80, 5)
-        }
-
-        if (!boss.punching.enabled) {
-            this.moveToTarget(boss.rigtArm.hand, {
-                x: boss.body.x + 285, 
-                y: boss.body.y + 40
-            }, 40, 5)
-            this.moveToTarget(boss.leftArm.hand, {
-                x: boss.body.x - 285, 
-                y: boss.body.y + 40
-            }, 40, 5)
-        }else {
-            if (boss.punching.side == 'left') {
-                this.moveToTarget(boss.rigtArm.hand, {
-                    x: boss.body.x + 285, 
-                    y: boss.body.y + 40
-                }, 40, 5)
-                if (this.moveToTarget(boss.leftArm.hand, {
-                    x: boss.punching.target.x, 
-                    y: boss.punching.target.y
-                }, 490, 15, true)) { this.hitFloor(); }
-            }else {
-                if (this.moveToTarget(boss.rigtArm.hand, {
-                    x: boss.punching.target.x, 
-                    y: boss.punching.target.y
-                }, 490, 15, true)) { this.hitFloor(); }
-                this.moveToTarget(boss.leftArm.hand, {
-                    x: boss.body.x - 285, 
-                    y: boss.body.y + 40
-                }, 40, 5)
-            }
-        }
-
-        //player.rotation = Phaser.Math.Angle.BetweenPoints(player, boss.body)
-        this.connectObjects(boss.rigtArm.shoulder, boss.rigtArm.elbow, connectors[0]);
-        this.connectObjects(boss.rigtArm.elbow, boss.rigtArm.hand, connectors[1]);
-
-        this.connectObjects(boss.leftArm.shoulder, boss.leftArm.elbow, connectors[2]);
-        this.connectObjects(boss.leftArm.elbow, boss.leftArm.hand, connectors[3]);
-
-        rockets.forEach(rocket => this.rocketToTarget(rocket, player));
-
-        boss.target = {x:player.x, y:player.y - 200}
-    }
-
     createGround() {
         //  The platforms group contains the ground and the 2 ledges we can jump on
         platforms = this.physics.add.staticGroup();
@@ -191,45 +40,31 @@ class Juego extends Phaser.Scene {
     }
 
     createBoss() {
-        var rocket = this.physics.add.sprite(100, 0, 'cohete');
-        rocket.setGravity(0, -300);
-        rockets.push(rocket);
-        var rocket = this.physics.add.sprite(200, 0, 'cohete');
-        rocket.setGravity(0, -300);
-        rockets.push(rocket);
-        var rocket = this.physics.add.sprite(300, 0, 'cohete');
-        rocket.setGravity(0, -300);
-        rockets.push(rocket);
-        var rocket = this.physics.add.sprite(400, 0, 'cohete');
-        rocket.setGravity(0, -300);
-        rockets.push(rocket);
-        var rocket = this.physics.add.sprite(500, 0, 'cohete');
-        rocket.setGravity(0, -300);
-        rockets.push(rocket);
-
-        boss.body = this.physics.add.sprite(400, 0, 'bossBody');
+        boss.body = this.physics.add.sprite(400, 0, 'robotoTorso').setScale(5);
+        boss.body.anims.play('robotoTorso', true);
 
         //  Conectores
-        connectors.push(this.add.sprite(0, 0, 'parte').setOrigin(0,0.5));
-        connectors.push(this.add.sprite(0, 0, 'parte').setOrigin(0,0.5));
-        connectors.push(this.add.sprite(0, 0, 'parte').setOrigin(0,0.5));
-        connectors.push(this.add.sprite(0, 0, 'parte').setOrigin(0,0.5));
+        connectors.push(this.add.sprite(0, 0, 'robotoConnector').setOrigin(0,0.5));
+        connectors.push(this.add.sprite(0, 0, 'robotoConnector').setOrigin(0,0.5));
+        connectors.push(this.add.sprite(0, 0, 'robotoConnector').setOrigin(0,0.5));
+        connectors.push(this.add.sprite(0, 0, 'robotoConnector').setOrigin(0,0.5));
 
         //  Brazo izquierdo
         boss.leftArm = {
-            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2),
-            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2),
-            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2)
+            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoShoulderL').setScale(2),
+            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoElbowL').setScale(2),
+            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHandL').setScale(2)
         }
 
         //  Brazo derecho
-        boss.rigtArm = {
-            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2),
-            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2),
-            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'node').setScale(2)
+        boss.rightArm = {
+            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoShoulderR').setScale(2),
+            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoElbowR').setScale(2),
+            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHandR').setScale(2)
         }
 
-        boss.head = this.physics.add.sprite(boss.body.x, boss.body.y, 'cabeza').setScale(3);
+        boss.head = this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHead').setScale(3);
+        boss.head.anims.play('robotoHead', true);
     }
 
     initColisiones() {
@@ -237,10 +72,9 @@ class Juego extends Phaser.Scene {
         this.physics.add.collider(player, platforms);
         this.physics.add.collider(player, layer);
         this.physics.add.collider(player, boss.body);
-        this.physics.add.collider(boss.rigtArm.hand, platforms, this.hitFloor, null, this);
+        this.physics.add.collider(boss.rightArm.hand, platforms, this.hitFloor, null, this);
         this.physics.add.collider(boss.leftArm.hand, platforms, this.hitFloor, null, this);
-        this.physics.add.collider(player, rockets, this.rocketHitPlayer, null, this);
-        this.physics.add.collider(platforms, rockets, this.rocketHitPlatform, null, this);
+        
     }
 
     initInputs() {
@@ -273,9 +107,58 @@ class Juego extends Phaser.Scene {
         //  Prueba de cohetes
         var VKey = this.input.keyboard.addKey('V');
         VKey.on('down', function () {
-            var rocket = this.physics.add.sprite(Phaser.Math.Between(100, 500), 0, 'cohete');
-            rocket.setGravity(0, -300);
-            rockets.push(rocket);
+            this.evaluateAttackSide();
+            if (boss.punching.side == 'left') {
+                var rocket = {
+                    obj : this.physics.add.sprite(boss.leftArm.shoulder.x, boss.leftArm.shoulder.y-20, 'cohete'),
+                    particles : this.add.particles('spark'),
+                    get emitter() {
+                        this.particles.createEmitter({
+                            follow: this.obj,
+                            radial: false,
+                            x: 100,
+                            y: { start: 0, end: 560, steps: 256 },
+                            lifespan: 2000,
+                            quantity: 4,
+                            gravityY: -50,
+                            scale: { start: 2, end: 0, ease: 'Power3' },
+                            blendMode: 'ADD'
+                        })
+                    }
+                }
+                rocket.emitter;
+                rocket.obj.setGravity(0, -300);
+                rocket.obj.setRotation(-1.57);
+                rocket.obj.anims.play('misiles');
+                rockets.push(rocket);
+                this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
+                this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
+            }else {
+                var rocket = {
+                    obj : this.physics.add.sprite(boss.rightArm.shoulder.x, boss.rightArm.shoulder.y-20, 'cohete'),
+                    particles : this.add.particles('spark'),
+                    get emitter() {
+                        this.particles.createEmitter({
+                            follow: this.obj,
+                            radial: false,
+                            x: 100,
+                            y: { start: 0, end: 560, steps: 256 },
+                            lifespan: 2000,
+                            quantity: 4,
+                            gravityY: -50,
+                            scale: { start: 2, end: 0, ease: 'Power3' },
+                            blendMode: 'ADD'
+                        })
+                    }
+                }
+                rocket.emitter;
+                rocket.obj.setGravity(0, -300);
+                rocket.obj.setRotation(-1.57);
+                rocket.obj.anims.play('misiles');
+                rockets.push(rocket);
+                this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
+                this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
+            }
         }, this);
 
         //  Mandar roboto a target
@@ -332,26 +215,28 @@ class Juego extends Phaser.Scene {
 
     rocketToTarget(rocket, target) {
         //  Busca angulo de cohete a jugador
-        var angle = Phaser.Math.Angle.BetweenPoints(rocket, target);
+        var angle = Phaser.Math.Angle.BetweenPoints(rocket.obj, target);
         //  Redondeado para suavizar rotación
-        if (Math.floor(angle*10) != Math.floor(rocket.rotation*10)) {
-            if (angle > rocket.rotation) {
+        if (Math.floor(angle*10) != Math.floor(rocket.obj.rotation*10)) {
+            if (angle > rocket.obj.rotation) {
                 //  Gira derecha
-                rocket.rotation += .05;
+                rocket.obj.rotation += .05;
             }else {
                 //  Gira izquierda
-                rocket.rotation -= .05;
+                rocket.obj.rotation -= .05;
             }
         }
         //  Avanza hacia el jugador
-        this.physics.velocityFromRotation(rocket.rotation, 100, rocket.body.velocity);
+        this.physics.velocityFromRotation(rocket.obj.rotation, 200, rocket.obj.body.velocity);
     }
 
     evaluateAttackSide() {
         if (boss.body.x > player.body.x) {
             boss.punching.side = 'left';
+            boss.leftArm.hand.rotation = Phaser.Math.Angle.BetweenPoints(boss.leftArm.hand, player.body) + -1.57;
         }else {
             boss.punching.side = 'right';
+            boss.rightArm.hand.rotation = Phaser.Math.Angle.BetweenPoints(boss.rightArm.hand, player.body) + -1.57;
         }
     }
 
@@ -360,7 +245,7 @@ class Juego extends Phaser.Scene {
         connector.x = obj1.x;
         connector.y = obj1.y;
         connector.rotation = Phaser.Math.Angle.BetweenPoints(obj1, obj2);
-        connector.setScale((Phaser.Math.Distance.Between(obj1.x, obj1.y, obj2.x, obj2.y)+32)*.03, 1);
+        connector.setScale((Phaser.Math.Distance.Between(obj1.x, obj1.y, obj2.x, obj2.y)+16)*.03, 1);
     }
 
     hitFloor() {
@@ -387,13 +272,28 @@ class Juego extends Phaser.Scene {
     }
 
     rocketHitPlayer(player, rocket) {
-        rockets.splice(rockets.indexOf(rocket), 1);
-        rocket.destroy();
+        var explosion = this.add.sprite(rocket.x, rocket.y, 'explosion');
+        explosion.anims.play('explosion', true);
+        console.log("Golpe al jugador");
+        rockets.forEach(function(rckt) {
+            if (rckt.obj == rocket) {
+                rockets.splice(rockets.indexOf(rckt), 1);
+                rckt.obj.destroy();
+                rckt.particles.destroy();
+            }
+        });
     }
 
     rocketHitPlatform(rocket, platform) {
-        rockets.splice(rockets.indexOf(rocket), 1);
-        rocket.destroy();
+        var explosion = this.add.sprite(rocket.x, rocket.y, 'explosion');
+        explosion.anims.play('explosion', true);
+        rockets.forEach(function(rckt) {
+            if (rckt.obj == rocket) {
+                rockets.splice(rockets.indexOf(rckt), 1);
+                rckt.obj.destroy();
+                rckt.particles.destroy();
+            }
+        });
     }
 
     initCamera() {
@@ -404,7 +304,8 @@ class Juego extends Phaser.Scene {
         camera1.width = 1920;
         camera1.height = 1080;
         camera1.scrollX = -100;
-        camera1.scrollY = 435;
+        camera1.scrollY = 320;
+        //  435
         camera1.zoom = 3;
         camera1.setBackgroundColor('rgba(0, 0, 0, 1)');
     }
