@@ -34,8 +34,10 @@ class Juego extends Phaser.Scene {
         player = this.add.container(100, 450);
         playerLegs = this.add.sprite(0, 0, 'playerlegs');
         playerTorso = this.add.sprite(0,0,'playerTorso');
+        playerWeapon = this.add.sprite(0, 0, 'pistol', 5);
         player.add(playerLegs);
         player.add(playerTorso);
+        player.add(playerWeapon);
         player.setSize(17, 32);
         this.physics.world.enable(player);
 
@@ -95,6 +97,11 @@ class Juego extends Phaser.Scene {
             {
                 this.scale.startFullscreen();
             }
+        }, this);
+
+        var ZKey = this.input.keyboard.addKey('Z');
+        ZKey.on('down', function () {
+            var bala = this.add.sprite(player.x - playerWeapons.pistol.points[playerWeapons.side].x, player.y - playerWeapons.pistol.points[playerWeapons.side].y , 'cohete');
         }, this);
 
         //  Prueba de colisiones
@@ -309,10 +316,14 @@ class Juego extends Phaser.Scene {
         camera1.width = 1920;
         camera1.height = 1080;
         camera1.scrollX = -100;
-        camera1.scrollY = 320;
+        camera1.scrollY = 360;
         //  435
         camera1.zoom = 3;
         camera1.setBackgroundColor('rgba(0, 0, 0, 1)');
+    }
+
+    initWeapons() {
+       
     }
 
     loadLevelData(lvl) {

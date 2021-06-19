@@ -11,6 +11,8 @@ class Inicio extends Phaser.Scene {
         this.load.image('bomb', 'assets/bomb.png');
         this.load.image('spark', 'assets/spark.png');
 
+        this.load.image('testWeapons', 'assets/test.png');
+
         this.load.image('bossBody', 'assets/torso.png');
         this.load.image('node', 'assets/nodo.png');
         this.load.image('parte', 'assets/parte.png');
@@ -20,6 +22,9 @@ class Inicio extends Phaser.Scene {
         //  Player
         this.load.spritesheet('playerTorso', 'assets/TorsoSpriteSheet.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('playerLegs', 'assets/piernasSpriteSheet.png', {frameWidth: 32, frameHeight: 32});
+
+        //  Weapons
+        this.load.spritesheet('pistol', 'assets/pistol.png', {frameWidth: 49, frameHeight: 49});
 
         //  Roboto
         this.load.spritesheet('robotoTorso', 'assets/Torso Roboto.png', {frameWidth: 32, frameHeight: 32});
@@ -56,7 +61,7 @@ class Inicio extends Phaser.Scene {
         this.anims.create({
             key: 'jump',
             frames: [{ key: 'playerLegs', frame: 7 }],
-            frameRate: 20
+            frameRate: 15
         });
 
         this.anims.create({

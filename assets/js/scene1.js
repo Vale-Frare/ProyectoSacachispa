@@ -6,6 +6,7 @@ class Scene1 extends Juego {
         this.createGround();
         this.loadMap();
         this.createPlayer();
+        this.initWeapons();
         this.createBoss();
 
         this.initColisiones();
@@ -41,7 +42,7 @@ class Scene1 extends Juego {
 
         if (player.body.onFloor()) {
             if (cursors.left.isDown) {
-                playerLegs.anims.play('left', true);
+                playerLegs.anims.play('left', true); 
             }
             else {
                 if (cursors.right.isDown) {
@@ -60,18 +61,24 @@ class Scene1 extends Juego {
             if (player.body.onFloor()) {
                 if (cursors.left.isDown) {
                     playerTorso.anims.play('upLeftTorso', true);
+                    playerWeapons.side = 6;
                 }else if (cursors.right.isDown) {
                     playerTorso.anims.play('upRightTorso', true);
+                    playerWeapons.side = 7;
                 }else {
                     playerTorso.anims.play('upTorso', true);
+                    playerWeapons.side = 1;
                 }
             }else {
                 if (cursors.left.isDown) {
                     playerTorso.anims.play('upLeftTorsoIdle', true);
+                    playerWeapons.side = 6;
                 }else if (cursors.right.isDown) {
                     playerTorso.anims.play('upRightTorsoIdle', true);
+                    playerWeapons.side = 7;
                 }else {
                     playerTorso.anims.play('upTorso', true);
+                    playerWeapons.side = 1;
                 }
             }
         }else {
@@ -79,18 +86,24 @@ class Scene1 extends Juego {
                 if (player.body.onFloor()) {
                     if (cursors.left.isDown) {
                         playerTorso.anims.play('downLeftTorso', true);
+                        playerWeapons.side = 2;
                     }else if (cursors.right.isDown) {
                         playerTorso.anims.play('downRightTorso', true);
+                        playerWeapons.side = 3;
                     }else {
                         playerTorso.anims.play('downTorso', true);
+                        playerWeapons.side = 0;
                     }
                 }else {
                     if (cursors.left.isDown) {
                         playerTorso.anims.play('downLeftTorsoIdle', true);
+                        playerWeapons.side = 2;
                     }else if (cursors.right.isDown) {
                         playerTorso.anims.play('downRightTorsoIdle', true);
+                        playerWeapons.side = 3;
                     }else {
                         playerTorso.anims.play('downTorso', true);
+                        playerWeapons.side = 0;
                     }
                 }
             }
@@ -98,16 +111,20 @@ class Scene1 extends Juego {
                 if (player.body.onFloor()) {
                     if (cursors.left.isDown) {
                         playerTorso.anims.play('leftTorso', true);
+                        playerWeapons.side = 4;
                     }
                     else if (cursors.right.isDown) {
                         playerTorso.anims.play('rightTorso', true);
+                        playerWeapons.side = 5;
                     }
                 }else {
                     if (cursors.left.isDown) {
                         playerTorso.anims.play('leftTorsoIdle', true);
+                        playerWeapons.side = 4;
                     }
                     else if (cursors.right.isDown) {
                         playerTorso.anims.play('rightTorsoIdle', true);
+                        playerWeapons.side = 5;
                     }
                 }
             }
@@ -179,6 +196,7 @@ class Scene1 extends Juego {
 
         rockets.forEach(rocket => this.rocketToTarget(rocket, player));
 
-        boss.target = {x:player.x, y: 830}
+        boss.target = {x:player.x, y: 830};
+        playerWeapon.setFrame(playerWeapons.side);
     }
 }

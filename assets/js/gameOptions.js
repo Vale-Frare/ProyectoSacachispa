@@ -40,8 +40,53 @@ let boss = {
 let camera1;
 let layer;
 let map;
-let rockets = []; 
-let player, playerTorso, playerLegs, platforms, cursors, score = 0, gameOver = false, scoreText, game, config,
+let rockets = [];
+let playerWeapons = {
+    side: 5,
+    pistol: {
+        textureKey: 'pistol',
+        rotation: [
+            1.57,
+            -1.57,
+            2.356,
+            0.785,
+            3.141,
+            0,
+            -2.35,
+            -0.78
+        ],
+        points: [
+            {x: 25, y: 39},
+            {x: 25, y: 2},
+            {x: 3, y: 34},
+            {x: 45, y: 34},
+            {x: 5, y: 16},
+            {x: 41, y: 16},
+            {x: 5, y: 3},
+            {x: 42, y: 3}
+        ],
+        damage: 5,
+        ammo: -1,
+        rateOfFire: 1
+    },
+    shotgun: {
+        textureKey: 'shotgun',
+        rotation: 0,
+        point: {x: 0, y: 0},
+        damage: 15,
+        ammo: 20,
+        rateOfFire: 2
+    },
+    uzi: {
+        textureKey: 'uzi',
+        rotation: 0,
+        point: {x: 0, y: 0},
+        damage: 2,
+        ammo: 150,
+        rateOfFire: 0.1
+    }
+};
+let player, playerTorso, playerLegs, playerWeapon, platforms, cursors, score = 0, gameOver = false, scoreText, game, config,
     sounds = {}, resizeGame = function () {
         let canvas = document.querySelector('canvas');
         const {innerWidth, innerHeight} = window; //object destructuring
