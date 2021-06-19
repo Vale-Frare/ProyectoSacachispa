@@ -15,11 +15,16 @@ class Juego extends Phaser.Scene {
         var layerBack = map.createLayer("background", tilesetBackground);
         layer = map.createLayer("platforms", tileset);
 
-        var sprites = map.createFromObjects("objects", {
+        var spritesSpawn = map.createFromObjects("objects", {
             name: 'spawn'
         });
-        sprites[0].visible = false;
-        levelsData[0].spawn = {x: sprites[0].x, y: sprites[0].y};
+        var spritesJefes = map.createFromObjects("objects", {
+            name: 'jefe'
+        });
+        spritesSpawn[0].visible = false;
+        levelsData[0].spawn = {x: spritesSpawn[0].x, y: spritesSpawn[0].y};
+        spritesJefes[0].visible = false;
+        boss.spawn = {x: spritesJefes[0].x, y: spritesJefes[0].y};
 
         layer.setCollisionByProperty({ collides: true });
     }
@@ -29,18 +34,17 @@ class Juego extends Phaser.Scene {
         player = this.add.container(100, 450);
         playerLegs = this.add.sprite(0, 0, 'playerlegs');
         playerTorso = this.add.sprite(0,0,'playerTorso');
-        player.add(playerTorso);
         player.add(playerLegs);
+        player.add(playerTorso);
         player.setSize(17, 32);
         this.physics.world.enable(player);
 
         //  Player physics properties. Give the little guy a slight bounce.
-        player.body.setBounce(0.2);
         player.body.setCollideWorldBounds(true);
     }
 
     createBoss() {
-        boss.body = this.physics.add.sprite(400, 0, 'robotoTorso').setScale(5);
+        boss.body = this.physics.add.sprite(boss.spawn.x, boss.spawn.y, 'robotoTorso').setScale(5);
         boss.body.anims.play('robotoTorso', true);
 
         //  Conectores
@@ -51,19 +55,19 @@ class Juego extends Phaser.Scene {
 
         //  Brazo izquierdo
         boss.leftArm = {
-            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoShoulderL').setScale(2),
-            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoElbowL').setScale(2),
-            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHandL').setScale(2)
+            shoulder: this.physics.add.sprite(boss.body.x - 85, boss.body.y - (80 + boss.shoulderOffsetY), 'robotoShoulderL').setScale(2),
+            elbow: this.physics.add.sprite(boss.body.x - 185, boss.body.y - (70 + boss.elbowOffsetY), 'robotoElbowL').setScale(2),
+            hand: this.physics.add.sprite(boss.body.x - (285 + boss.handOffsetX), boss.body.y + (40 + boss.handOffsetY), 'robotoHandL').setScale(2)
         }
 
         //  Brazo derecho
         boss.rightArm = {
-            shoulder: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoShoulderR').setScale(2),
-            elbow: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoElbowR').setScale(2),
-            hand: this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHandR').setScale(2)
+            shoulder: this.physics.add.sprite(boss.body.x + 85, boss.body.y - (80 + boss.shoulderOffsetY), 'robotoShoulderR').setScale(2),
+            elbow: this.physics.add.sprite(boss.body.x + 185, boss.body.y - (70 + boss.elbowOffsetY), 'robotoElbowR').setScale(2),
+            hand: this.physics.add.sprite(boss.body.x + (285 + boss.handOffsetX), boss.body.y + (40 + boss.handOffsetY), 'robotoHandR').setScale(2)
         }
 
-        boss.head = this.physics.add.sprite(boss.body.x, boss.body.y, 'robotoHead').setScale(3);
+        boss.head = this.physics.add.sprite(boss.body.x, boss.body.y - 110, 'robotoHead').setScale(3);
         boss.head.anims.play('robotoHead', true);
     }
 
@@ -80,6 +84,7 @@ class Juego extends Phaser.Scene {
     initInputs() {
         //  Input Events
         cursors = this.input.keyboard.createCursorKeys();
+        spaceKey = this.input.keyboard.addKey('SPACE');
         var FKey = this.input.keyboard.addKey('F');
         FKey.on('down', function () {
             if (this.scale.isFullscreen)
@@ -310,9 +315,9 @@ class Juego extends Phaser.Scene {
         camera1.setBackgroundColor('rgba(0, 0, 0, 1)');
     }
 
-    loadLevelData(level) {
-        player.body.x = levelsData[level-1].spawn.x;
-        player.body.y = levelsData[level-1].spawn.y;
+    loadLevelData(lvl) {
+        player.x = levelsData[lvl-1].spawn.x;
+        player.y = levelsData[lvl-1].spawn.y;
     }
 
 }

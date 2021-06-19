@@ -43,7 +43,7 @@ class Inicio extends Phaser.Scene {
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('playerLegs', { start: 0, end: 6 }),
-            frameRate: 10,
+            frameRate: 15,
             repeat: -1
         });
 
@@ -62,15 +62,21 @@ class Inicio extends Phaser.Scene {
         this.anims.create({
             key: 'right',
             frames: this.anims.generateFrameNumbers('playerLegs', { start: 8, end: 14 }),
-            frameRate: 10,
+            frameRate: 15,
             repeat: -1
         });
 
+        // Torso Center
         this.anims.create({
             key: 'leftTorso',
             frames: this.anims.generateFrameNumbers('playerTorso', { start: 13, end: 18 }),
             frameRate: 10,
             repeat: -1
+        });
+        this.anims.create({
+            key: 'leftTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 13 }],
+            frameRate: 10
         });
         this.anims.create({
             key: 'idleTorso',
@@ -83,7 +89,13 @@ class Inicio extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
         });
+        this.anims.create({
+            key: 'rightTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 20 }],
+            frameRate: 20
+        });
 
+        //  Up Left Torso
         this.anims.create({
             key: 'upLeftTorso',
             frames: this.anims.generateFrameNumbers('playerTorso', { start: 0, end: 5 }),
@@ -91,18 +103,32 @@ class Inicio extends Phaser.Scene {
             repeat: -1
         });
         this.anims.create({
+            key: 'upLeftTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 0 }],
+            frameRate: 20,
+        });
+
+        //  Up Torso
+        this.anims.create({
             key: 'upTorso',
             frames: [{ key: 'playerTorso', frame: 6 }],
             frameRate: 20
         });
+
+        //  Up Right Torso
         this.anims.create({
             key: 'upRightTorso',
             frames: this.anims.generateFrameNumbers('playerTorso', { start: 7, end: 12 }),
             frameRate: 10,
             repeat: -1
         });
+        this.anims.create({
+            key: 'upRightTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 7 }],
+            frameRate: 20,
+        });
 
-
+        // Down Left Torso
         this.anims.create({
             key: 'downLeftTorso',
             frames: this.anims.generateFrameNumbers('playerTorso', { start: 26, end: 31 }),
@@ -110,15 +136,29 @@ class Inicio extends Phaser.Scene {
             repeat: -1
         });
         this.anims.create({
+            key: 'downLeftTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 26 }],
+            frameRate: 20,
+        });
+
+        //  Down Torso
+        this.anims.create({
             key: 'downTorso',
             frames: [{ key: 'playerTorso', frame: 32 }],
             frameRate: 20
         });
+
+        //  Down Right Torso
         this.anims.create({
             key: 'downRightTorso',
             frames: this.anims.generateFrameNumbers('playerTorso', { start: 33, end: 38 }),
             frameRate: 10,
             repeat: -1
+        });
+        this.anims.create({
+            key: 'downRightTorsoIdle',
+            frames: [{ key: 'playerTorso', frame: 33 }],
+            frameRate: 20,
         });
 
         //  Roboto anims

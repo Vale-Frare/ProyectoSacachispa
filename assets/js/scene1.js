@@ -21,29 +21,43 @@ class Scene1 extends Juego {
             return;
         }
 
-        if(cursors.left.isUp || cursors.right.isUp){
+        if (spaceKey.isDown) {
+            if (player.body.onFloor()) {
+                player.body.setVelocityY(-180);
+            }
         }
 
         if (cursors.left.isDown) {
             player.body.setVelocityX(-160);
-            playerLegs.anims.play('left', true);
         }
         else {
             if (cursors.right.isDown) {
                 player.body.setVelocityX(160);
-                playerLegs.anims.play('right', true);
             }   
             else {
                 player.body.setVelocityX(0);
-                playerLegs.anims.play('turn');
-                playerTorso.anims.stop();
             }
+        }
+
+        if (player.body.onFloor()) {
+            if (cursors.left.isDown) {
+                playerLegs.anims.play('left', true);
+            }
+            else {
+                if (cursors.right.isDown) {
+                    playerLegs.anims.play('right', true);
+                }   
+                else {
+                    playerLegs.anims.play('turn');
+                    playerTorso.anims.stop();
+                }
+            }
+        }else {
+            playerLegs.anims.play('jump');
         }
 
         if (cursors.up.isDown) {
             if (player.body.onFloor()) {
-                player.body.setVelocityY(-180);
-                playerLegs.anims.play('jump');
                 if (cursors.left.isDown) {
                     playerTorso.anims.play('upLeftTorso', true);
                 }else if (cursors.right.isDown) {
@@ -51,23 +65,50 @@ class Scene1 extends Juego {
                 }else {
                     playerTorso.anims.play('upTorso', true);
                 }
+            }else {
+                if (cursors.left.isDown) {
+                    playerTorso.anims.play('upLeftTorsoIdle', true);
+                }else if (cursors.right.isDown) {
+                    playerTorso.anims.play('upRightTorsoIdle', true);
+                }else {
+                    playerTorso.anims.play('upTorso', true);
+                }
             }
         }else {
             if (cursors.down.isDown) {
-                if (cursors.left.isDown) {
-                    playerTorso.anims.play('downLeftTorso', true);
-                }else if (cursors.right.isDown) {
-                    playerTorso.anims.play('downRightTorso', true);
+                if (player.body.onFloor()) {
+                    if (cursors.left.isDown) {
+                        playerTorso.anims.play('downLeftTorso', true);
+                    }else if (cursors.right.isDown) {
+                        playerTorso.anims.play('downRightTorso', true);
+                    }else {
+                        playerTorso.anims.play('downTorso', true);
+                    }
                 }else {
-                    playerTorso.anims.play('downTorso', true);
+                    if (cursors.left.isDown) {
+                        playerTorso.anims.play('downLeftTorsoIdle', true);
+                    }else if (cursors.right.isDown) {
+                        playerTorso.anims.play('downRightTorsoIdle', true);
+                    }else {
+                        playerTorso.anims.play('downTorso', true);
+                    }
                 }
             }
             else {
-                if (cursors.left.isDown) {
-                    playerTorso.anims.play('leftTorso', true);
-                }
-                else if (cursors.right.isDown) {
-                    playerTorso.anims.play('rightTorso', true);
+                if (player.body.onFloor()) {
+                    if (cursors.left.isDown) {
+                        playerTorso.anims.play('leftTorso', true);
+                    }
+                    else if (cursors.right.isDown) {
+                        playerTorso.anims.play('rightTorso', true);
+                    }
+                }else {
+                    if (cursors.left.isDown) {
+                        playerTorso.anims.play('leftTorsoIdle', true);
+                    }
+                    else if (cursors.right.isDown) {
+                        playerTorso.anims.play('rightTorsoIdle', true);
+                    }
                 }
             }
         }
@@ -138,6 +179,6 @@ class Scene1 extends Juego {
 
         rockets.forEach(rocket => this.rocketToTarget(rocket, player));
 
-        boss.target = {x:player.x, y:player.y - 160}
+        boss.target = {x:player.x, y: 830}
     }
 }

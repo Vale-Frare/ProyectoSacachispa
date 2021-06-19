@@ -1,5 +1,5 @@
 console.log('carga');
-let test = 0;
+let spaceKey;
 let levelsData = [
     {// Nivel 1
         spawn : { x: 0, y: 0},
@@ -12,6 +12,7 @@ let levelsData = [
     }
 ]
 let boss = {
+    spawn : {x: 0, y: 0},
     body : null,
     head : null,
     shoulderOffsetY: 0,
