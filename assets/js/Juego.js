@@ -602,6 +602,11 @@ class Juego extends Phaser.Scene {
                 target : {x: 0, y: 0}
             }
         };
+        stadistics = {
+            timer: 100,
+            score: 0,
+            lifes: 3,
+        };
     }
 
     shotWeapon() {
