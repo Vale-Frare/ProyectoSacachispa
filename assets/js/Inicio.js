@@ -11,7 +11,7 @@ class Inicio extends Phaser.Scene {
         this.load.image('bomb', 'assets/bomb.png');
         this.load.image('spark', 'assets/spark.png');
 
-        this.load.image('testWeapons', 'assets/test.png');
+        this.load.image('bullet', 'assets/bullet.png');
 
         this.load.image('bossBody', 'assets/torso.png');
         this.load.image('node', 'assets/nodo.png');
@@ -22,9 +22,13 @@ class Inicio extends Phaser.Scene {
         //  Player
         this.load.spritesheet('playerTorso', 'assets/TorsoSpriteSheet.png', {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet('playerLegs', 'assets/piernasSpriteSheet.png', {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet('playerMuerte', 'assets/muerte.png', {frameWidth: 32, frameHeight: 32});
 
         //  Weapons
-        this.load.spritesheet('pistol', 'assets/pistol.png', {frameWidth: 49, frameHeight: 49});
+        this.load.spritesheet('pistol', 'assets/pistol.png', {frameWidth: 65, frameHeight: 65});
+        this.load.spritesheet('shotgun', 'assets/shotgun.png', {frameWidth: 65, frameHeight: 65});
+        this.load.spritesheet('uzi', 'assets/uzi.png', {frameWidth: 65, frameHeight: 65});
+        this.load.image('bullet', 'assets/bullete.png');
 
         //  Roboto
         this.load.spritesheet('robotoTorso', 'assets/Torso Roboto.png', {frameWidth: 32, frameHeight: 32});
@@ -37,6 +41,11 @@ class Inicio extends Phaser.Scene {
         this.load.image('robotoHandR', 'assets/Puños Roboto-R.png');
         this.load.image('robotoConnector', 'assets/Conectores Roboto.png');
         this.load.spritesheet('explosion', 'assets/Explosion.png', {frameWidth: 32, frameHeight: 32});
+
+        //  Enemies
+        this.load.spritesheet('enemy1', 'assets/enemy1.png', {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet('enemy2', 'assets/enemy2.png', {frameWidth: 12, frameHeight: 22});
+        this.load.spritesheet('enemy3', 'assets/enemy3.png', {frameWidth: 17, frameHeight: 20});
 
         this.load.image('atlas1', './assets/maps/atlas1.png');
         this.load.image('mapafondo', './assets/maps/mapafondo.png');
@@ -166,6 +175,14 @@ class Inicio extends Phaser.Scene {
             frameRate: 20,
         });
 
+        //  Muerte anim
+        this.anims.create({
+            key: 'playerMuerte',
+            frames: this.anims.generateFrameNumbers('playerMuerte', { start: 0, end: 5 }),
+            frameRate: 20,
+            repeat: 0
+        });
+
         //  Roboto anims
         this.anims.create({
             key: 'robotoHead',
@@ -192,7 +209,21 @@ class Inicio extends Phaser.Scene {
             repeat: 0
         });
 
-        this.scene.start('Scene1')
+        //  Enemies anims
+        this.anims.create({
+            key: 'enemy1Left',
+            frames: this.anims.generateFrameNumbers('enemy1', { start: 0, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'enemy1Right',
+            frames: this.anims.generateFrameNumbers('enemy1', { start: 4, end: 7 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.scene.start('Scene1');
 
         var logo = this.add.image(400, 300, 'logo').setScale(0.26)
         logo.setInteractive()

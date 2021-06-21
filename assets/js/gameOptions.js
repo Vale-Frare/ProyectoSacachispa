@@ -1,17 +1,27 @@
 console.log('carga');
 let spaceKey;
+let ZKey;
+let loadingBar;
 let levelsData = [
     {// Nivel 1
         spawn : { x: 0, y: 0},
         objects : [],
         enemies: [],
+        loadingProgress: 0,
     },
     {// Nivel 2
         spawn : { x: 0, y: 0},
-        objects : []
+        objects : [],
+        enemies: [],
+        loadingProgress: 0,
     }
 ]
 let boss = {
+    damage : {
+        head: 0,
+        leftHand: 0,
+        rightHand: 0
+    },
     spawn : {x: 0, y: 0},
     body : null,
     head : null,
@@ -37,14 +47,38 @@ let boss = {
         target : {x: 0, y: 0}
     }
 };
+let timer = 0;
 let camera1;
 let layer;
 let map;
 let rockets = [];
 let playerWeapons = {
+    quantity: 3,
+    equipped: 'pistol',
     side: 5,
     pistol: {
         textureKey: 'pistol',
+        obj: null,
+        rotation: [
+            1.57,
+            -1.57,
+            2.356,
+            0.785,
+            3.141,
+            0,
+            -2.35,
+            -0.78
+        ],
+        points: [],
+        damage: 5,
+        ammo: -1,
+        spread: 6,
+        bulletsPerShot: 1, //Test
+        rateOfFire: 1
+    },
+    shotgun: {
+        textureKey: 'shotgun',
+        obj: null,
         rotation: [
             1.57,
             -1.57,
@@ -56,36 +90,36 @@ let playerWeapons = {
             -0.78
         ],
         points: [
-            {x: 25, y: 39},
-            {x: 25, y: 2},
-            {x: 3, y: 34},
-            {x: 45, y: 34},
-            {x: 5, y: 16},
-            {x: 41, y: 16},
-            {x: 5, y: 3},
-            {x: 42, y: 3}
         ],
-        damage: 5,
-        ammo: -1,
-        rateOfFire: 1
-    },
-    shotgun: {
-        textureKey: 'shotgun',
-        rotation: 0,
-        point: {x: 0, y: 0},
         damage: 15,
         ammo: 20,
+        spread: 12,
+        bulletsPerShot: 5,
         rateOfFire: 2
     },
     uzi: {
         textureKey: 'uzi',
-        rotation: 0,
-        point: {x: 0, y: 0},
+        obj: null,
+        rotation: [
+            1.57,
+            -1.57,
+            2.356,
+            0.785,
+            3.141,
+            0,
+            -2.35,
+            -0.78
+        ],
+        points: [
+        ],
         damage: 2,
         ammo: 150,
-        rateOfFire: 0.1
+        spread: 12,
+        bulletsPerShot: 1, //Test
+        rateOfFire: 0.2
     }
 };
+let playerLoadedWeapons = [];
 let player, playerTorso, playerLegs, playerWeapon, platforms, cursors, score = 0, gameOver = false, scoreText, game, config,
     sounds = {}, resizeGame = function () {
         let canvas = document.querySelector('canvas');
@@ -134,7 +168,7 @@ window.onload = function () {
             }
         },
         pixelArt: true,
-        scene: [Inicio, Scene1, Fin]
+        scene: [Inicio, Scene1, Fin, UiScene]
     };
 
     game = new Phaser.Game(config);

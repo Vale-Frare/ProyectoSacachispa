@@ -21,6 +21,41 @@ class Juego extends Phaser.Scene {
         var spritesJefes = map.createFromObjects("objects", {
             name: 'jefe'
         });
+
+        var spritesEnemies1 = map.createFromObjects("objects", {
+            name: 'enemy1',
+            key: 'enemy1',
+            width: 32,
+            height: 32
+        });
+        spritesEnemies1.forEach(element => {
+            this.physics.world.enable(element);
+            this.physics.add.collider(element, layer);
+            levelsData[0].enemies.push(element);
+        });
+        var spritesEnemies2 = map.createFromObjects("objects", {
+            name: 'enemy2',
+            key: 'enemy2'
+        });
+        spritesEnemies2.forEach(element => {
+            this.physics.world.enable(element);
+            elemen.body.immovable = true;
+            element.body.allowGravity = false;
+            this.physics.add.collider(element, layer);
+            levelsData[0].enemies.push(element);
+        });
+        var spritesEnemies3 = map.createFromObjects("objects", {
+            name: 'enemy3',
+            key: 'enemy3'
+        });
+        spritesEnemies3.forEach(element => {
+            this.physics.world.enable(element);
+            element.body.immovable = true;
+            element.body.allowGravity = false;
+            this.physics.add.collider(element, layer);
+            levelsData[0].enemies.push(element);
+        });
+
         spritesSpawn[0].visible = false;
         levelsData[0].spawn = {x: spritesSpawn[0].x, y: spritesSpawn[0].y};
         spritesJefes[0].visible = false;
@@ -29,15 +64,41 @@ class Juego extends Phaser.Scene {
         layer.setCollisionByProperty({ collides: true });
     }
 
+    initWeapons(container) {
+        Object.values(playerWeapons).forEach(function (value) {
+            if (value != playerWeapons.quantity && value != playerWeapons.equipped && value != playerWeapons.side) {
+                playerLoadedWeapons.push(value);
+                for (var i = 0; i < 8; i++) {
+                    for (var x = 0; x < 65; x++) {
+                        for (var y = 0; y < 65; y++) {
+                            var color = this.textures.getPixel(x, y, playerLoadedWeapons[playerLoadedWeapons.length-1].textureKey, i);
+                            if (color != null) {
+                                if (color._rgba == "rgba(48,50,48,1)") {
+                                    console.log(color._rgba);
+                                    playerLoadedWeapons[playerLoadedWeapons.length-1].points.push({x: x, y: y});
+                                    x = 65;
+                                    y = 65;
+                                }
+                            }
+                        }
+                    }
+                }
+                console.log(playerLoadedWeapons[playerLoadedWeapons.length-1]);
+                playerLoadedWeapons[playerLoadedWeapons.length-1].obj = this.add.sprite(0, 0, playerLoadedWeapons[playerLoadedWeapons.length-1].textureKey, 5); 
+                container.add(playerLoadedWeapons[playerLoadedWeapons.length-1].obj);
+            }
+        }, this);
+    }
+
     createPlayer() {
         // The player and its settings
         player = this.add.container(100, 450);
         playerLegs = this.add.sprite(0, 0, 'playerlegs');
         playerTorso = this.add.sprite(0,0,'playerTorso');
-        playerWeapon = this.add.sprite(0, 0, 'pistol', 5);
+        playerTorso.setFrame(20);
         player.add(playerLegs);
+        this.initWeapons(player);
         player.add(playerTorso);
-        player.add(playerWeapon);
         player.setSize(17, 32);
         this.physics.world.enable(player);
 
@@ -78,6 +139,7 @@ class Juego extends Phaser.Scene {
         this.physics.add.collider(player, platforms);
         this.physics.add.collider(player, layer);
         this.physics.add.collider(player, boss.body);
+        this.physics.add.collider(player, levelsData[0].enemies);
         this.physics.add.collider(boss.rightArm.hand, platforms, this.hitFloor, null, this);
         this.physics.add.collider(boss.leftArm.hand, platforms, this.hitFloor, null, this);
         
@@ -99,9 +161,20 @@ class Juego extends Phaser.Scene {
             }
         }, this);
 
-        var ZKey = this.input.keyboard.addKey('Z');
-        ZKey.on('down', function () {
-            var bala = this.add.sprite(player.x - playerWeapons.pistol.points[playerWeapons.side].x, player.y - playerWeapons.pistol.points[playerWeapons.side].y , 'cohete');
+        ZKey = this.input.keyboard.addKey('Z');
+
+        //  Prueba de colisiones
+        var OneKey = this.input.keyboard.addKey('Q');
+        OneKey.on('down', function () {
+            if (playerWeapons.equipped == 'uzi') {
+                this.switchWeapon('pistol');
+            }else
+            if (playerWeapons.equipped == 'pistol') {
+                this.switchWeapon('shotgun');
+            }else
+            if (playerWeapons.equipped == 'shotgun') {
+                this.switchWeapon('uzi');
+            }
         }, this);
 
         //  Prueba de colisiones
@@ -264,6 +337,31 @@ class Juego extends Phaser.Scene {
         boss.punching.enabled = false;
     }
 
+    bulletHit(bullet, hitted) {
+        var ang = -Phaser.Math.Angle.BetweenPoints(bullet, hitted);
+        var x = (3.141/2) - Math.abs(ang);
+        var y = (1.570/2) - Math.abs(ang);
+        hitted.x += x;
+        hitted.y += y;
+        this.tweens.add({
+            targets: hitted,
+            tint: 0xFF0000,
+            ease: 'Linear',  
+            duration: 60,
+            repeat: 1,
+            yoyo: true  
+          });
+        if(hitted == boss.leftArm.hand) {
+            boss.damage.leftHand += playerWeapons[playerWeapons.equipped].damage;
+        }else if(hitted == boss.rightArm.hand) {
+            boss.damage.rightHand += playerWeapons[playerWeapons.equipped].damage;
+        }else if(hitted == boss.head) {
+            boss.damage.head += playerWeapons[playerWeapons.equipped].damage;
+        }
+
+        bullet.destroy();
+    }
+
     bossAttack(type) {
         switch (type) {
             case 0:
@@ -294,6 +392,8 @@ class Juego extends Phaser.Scene {
                 rckt.particles.destroy();
             }
         });
+        playerTorso.anims.play('playerMuerte');
+        gameOver = true;
     }
 
     rocketHitPlatform(rocket, platform) {
@@ -322,13 +422,49 @@ class Juego extends Phaser.Scene {
         camera1.setBackgroundColor('rgba(0, 0, 0, 1)');
     }
 
-    initWeapons() {
-       
-    }
-
     loadLevelData(lvl) {
         player.x = levelsData[lvl-1].spawn.x;
         player.y = levelsData[lvl-1].spawn.y;
+    }
+
+    switchWeapon(weaponId) {
+        playerWeapons.equipped = weaponId;
+        timer = 5;
+    }
+
+    spawnEnemy(type, x, y) {
+        if (type == 0) {
+            levelsData[0].enemies.push(
+                {
+                    obj: this.physics.add.sprite(x, y, `enemy${type+1}`),
+                    type: type,
+                    pos: {x: x, y: y}
+                }
+            );
+        }else {
+            levelsData[0].enemies.push(
+                {
+                    obj: this.add.sprite(x, y, `enemy${type+1}`),
+                    type: type,
+                    pos: {x: x, y: y}
+                }
+            );
+        }
+    }
+
+    shotWeapon() {
+        if (timer > playerWeapons[playerWeapons.equipped].rateOfFire) {
+            for (var i = 0; i < playerWeapons[playerWeapons.equipped].bulletsPerShot; i++) {
+                var bala = this.physics.add.sprite(player.x + (playerWeapons[playerWeapons.equipped].points[playerWeapons.side].x - (65/2)), player.y + (playerWeapons[playerWeapons.equipped].points[playerWeapons.side].y - (65/2)), 'bullet').setOrigin(0, 0.5);
+                bala.setGravityY(-300);
+                bala.rotation = playerWeapons.pistol.rotation[playerWeapons.side] + Phaser.Math.FloatBetween(-.01 * playerWeapons[playerWeapons.equipped].spread, .01 * playerWeapons[playerWeapons.equipped].spread);
+                this.physics.velocityFromRotation(bala.rotation, 500, bala.body.velocity);
+                this.physics.add.collider(bala, boss.rightArm.hand, this.bulletHit, null, this);
+                this.physics.add.collider(bala, boss.leftArm.hand, this.bulletHit, null, this);
+                this.physics.add.collider(bala, boss.head, this.bulletHit, null, this);
+            }
+            timer = 0;
+        }
     }
 
 }

@@ -3,10 +3,10 @@ class Scene1 extends Juego {
         super("Scene1");
     }
     create() {
+        //this.initLoadingBar();
         this.createGround();
         this.loadMap();
         this.createPlayer();
-        this.initWeapons();
         this.createBoss();
 
         this.initColisiones();
@@ -14,6 +14,7 @@ class Scene1 extends Juego {
         this.initCamera();
 
         this.loadLevelData(1);
+        this.scene.stop('UIScene');
 
         boss.target = levelsData[0].spawn
     }
@@ -54,7 +55,7 @@ class Scene1 extends Juego {
                 }
             }
         }else {
-            playerLegs.anims.play('jump');
+            playerLegs.anims.stop();
         }
 
         if (cursors.up.isDown) {
@@ -178,7 +179,7 @@ class Scene1 extends Juego {
             }else {
                 if (this.moveToTarget(boss.rightArm.hand, {
                     x: boss.punching.target.x, 
-                    y: boss.punching.target.y
+                    y: boss.punching.target.ys
                 }, 490, 15, true)) { this.hitFloor(); }
                 this.moveToTarget(boss.leftArm.hand, {
                     x: boss.body.x - 285, 
@@ -186,7 +187,6 @@ class Scene1 extends Juego {
                 }, 40, 5)
             }
         }
-
         //player.rotation = Phaser.Math.Angle.BetweenPoints(player, boss.body)
         this.connectObjects(boss.rightArm.shoulder, boss.rightArm.elbow, connectors[0]);
         this.connectObjects(boss.rightArm.elbow, boss.rightArm.hand, connectors[1]);
@@ -194,9 +194,38 @@ class Scene1 extends Juego {
         this.connectObjects(boss.leftArm.shoulder, boss.leftArm.elbow, connectors[2]);
         this.connectObjects(boss.leftArm.elbow, boss.leftArm.hand, connectors[3]);
 
+        //  Enemies AI
+        levelsData[0].enemies.forEach(enemy => {
+            if (enemy.texture.key == 'enemy1') {
+                if (Math.abs(enemy.body.x - player.body.x) > 100) {
+                    if(enemy.body.x > player.body.x) {
+                        enemy.body.setVelocityX(-50);
+                        enemy.anims.play('enemy1Left', true);
+                    }else if(enemy.body.x < player.body.x) {
+                        enemy.body.setVelocityX(50);
+                        enemy.anims.play('enemy1Right', true);
+                    }
+                }else {
+                    enemy.body.setVelocityX(0);
+                    enemy.anims.stop();
+                }
+            } 
+        });
+
         rockets.forEach(rocket => this.rocketToTarget(rocket, player));
 
-        boss.target = {x:player.x, y: 830};
-        playerWeapon.setFrame(playerWeapons.side);
+        boss.target = {x:player.body.x, y: 830};
+        playerLoadedWeapons.forEach(function(weapon) {
+            weapon.obj.setFrame(playerWeapons.side);
+            if (playerWeapons.equipped == weapon.textureKey) {
+                weapon.obj.setVisible(true);
+            }else {
+                weapon.obj.setVisible(false);
+            }
+        });
+        timer = Phaser.Math.Clamp(timer + delta/200, 0, 5);
+        if (ZKey.isDown) {
+            this.shotWeapon();
+        }
     }
 }
