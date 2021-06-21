@@ -2,16 +2,27 @@ console.log('carga');
 let spaceKey;
 let ZKey;
 let loadingBar;
+let levelLoaded = 0;
+let stadistics = {
+    timer: 100,
+    score: 0,
+    lifes: 3,
+}
+let uiElements = {
+    scoreText: null,
+    lifesText: null,
+    timerText: null
+}
 let levelsData = [
     {// Nivel 1
         spawn : { x: 0, y: 0},
-        objects : [],
+        pickups : [],
         enemies: [],
         loadingProgress: 0,
     },
     {// Nivel 2
         spawn : { x: 0, y: 0},
-        objects : [],
+        pickups : [],
         enemies: [],
         loadingProgress: 0,
     }
@@ -48,6 +59,12 @@ let boss = {
     }
 };
 let timer = 0;
+let timerEnemy1 = 0;
+let enemy1RateOfFire = 4.5;
+let timerEnemy2 = 0;
+let enemy2RateOfFire = 4.5;
+let timerEnemy3 = 0;
+let enemy3RateOfFire = 4.5;
 let camera1;
 let layer;
 let map;
@@ -93,6 +110,7 @@ let playerWeapons = {
         ],
         damage: 15,
         ammo: 20,
+        ammoComplete: 20,
         spread: 12,
         bulletsPerShot: 5,
         rateOfFire: 2
@@ -114,6 +132,7 @@ let playerWeapons = {
         ],
         damage: 2,
         ammo: 150,
+        ammoComplete: 150,
         spread: 12,
         bulletsPerShot: 1, //Test
         rateOfFire: 0.2
@@ -164,7 +183,7 @@ window.onload = function () {
             default: 'arcade',
             arcade: {
                 gravity: { y: 300 },
-                debug: false
+                debug: true
             }
         },
         pixelArt: true,

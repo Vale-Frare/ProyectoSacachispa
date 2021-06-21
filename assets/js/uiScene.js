@@ -4,15 +4,20 @@ class UiScene extends Phaser.Scene {
     }
     preload() {
         this.load.image('loadingBar', 'assets/loadingBar.png');
+        this.load.spritesheet('heartsHud', 'assets/heartsHud.png', {frameWidth: 39, frameHeight: 8});
     }
 
     create() {
         console.log("Cargo");
+        uiElements.scoreText = this.add.text(10, 10, 'Score: 0', { fontFamily: 'tinyUnicode', fontSize: '80px' });
+        uiElements.timerText = this.add.text(1700, 10, 'Timer: 100', { fontFamily: 'tinyUnicode', fontSize: '80px', align: 'right'});
+        uiElements.lifesText = this.add.sprite(920, 30, 'heartsHud').setScale(5);
         this.initLoadingBar();
-        let info = this.add.text(724, 791, 'CARGANDO', { font: '48px Arial', fill: '#000000' });
     }
     update() {   
-        
+        uiElements.scoreText.text = `Score: ${stadistics.score}`;
+        uiElements.lifesText.setFrame(stadistics.lifes);
+        uiElements.timerText.text = `Timer: ${Math.floor(stadistics.timer)}`;
     }
     
     initLoadingBar() {

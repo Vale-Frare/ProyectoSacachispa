@@ -3,10 +3,12 @@ class Scene1 extends Juego {
         super("Scene1");
     }
     create() {
+        this.resetEverything();
         //this.initLoadingBar();
         this.createGround();
         this.loadMap();
         this.createPlayer();
+        this.regenPickups();
         this.createBoss();
 
         this.initColisiones();
@@ -14,12 +16,20 @@ class Scene1 extends Juego {
         this.initCamera();
 
         this.loadLevelData(1);
-        this.scene.stop('UIScene');
+        loadingBar.setVisible(false);
 
-        boss.target = levelsData[0].spawn
+        boss.target = levelsData[0].spawn;
     }
     update(time, delta) {   
+        if (stadistics.timer <= 0) {playerTorso.anims.play('playerMuerte', true);gameOver=true};
         if (!gameOver) {
+            playerLoadedWeapons.forEach(weapon => {
+                if (weapon.ammo <= 0 && weapon.ammo != -1) {
+                    weapon.ammo = playerWeapons[weapon.textureKey].ammoComplete;
+                    playerWeapons.equipped = 'pistol';
+                }
+            });
+            stadistics.timer -= delta/1200;
             if (spaceKey.isDown) {
                 if (player.body.onFloor()) {
                     player.body.setVelocityY(-180);
@@ -127,6 +137,24 @@ class Scene1 extends Juego {
                     }
                 }
             }
+            if (ZKey.isDown) {
+                this.shotWeapon();
+            }
+        }else {
+            player.body.setVelocityX(0);
+            playerLoadedWeapons.forEach(weapon => {
+                weapon.obj.x = 2000;
+            });
+            playerLegs.anims.play('turn', true);
+            playerLegs.anims.stop();
+            if (playerTorso.anims.getProgress() == 1) {
+                console.log('rip');
+                if (stadistics.lifes <= 0) {
+                    this.scene.start('fin');
+                }else {
+                    this.scene.restart();
+                }
+            }
         }
 
         if (boss.moving) {
@@ -177,7 +205,7 @@ class Scene1 extends Juego {
             }else {
                 if (this.moveToTarget(boss.rightArm.hand, {
                     x: boss.punching.target.x, 
-                    y: boss.punching.target.ys
+                    y: boss.punching.target.y
                 }, 490, 15, true)) { this.hitFloor(); }
                 this.moveToTarget(boss.leftArm.hand, {
                     x: boss.body.x - 285, 
@@ -193,22 +221,48 @@ class Scene1 extends Juego {
         this.connectObjects(boss.leftArm.elbow, boss.leftArm.hand, connectors[3]);
 
         //  Enemies AI
-        levelsData[0].enemies.forEach(enemy => {
-            if (enemy.texture.key == 'enemy1') {
-                if (Math.abs(enemy.body.x - player.body.x) > 100) {
-                    if(enemy.body.x > player.body.x) {
-                        enemy.body.setVelocityX(-50);
-                        enemy.anims.play('enemy1Left', true);
-                    }else if(enemy.body.x < player.body.x) {
-                        enemy.body.setVelocityX(50);
-                        enemy.anims.play('enemy1Right', true);
+        if (!gameOver) {
+            levelsData[0].enemies.forEach(enemy => {
+                if (enemy.texture.key === 'enemy1') {
+                    if (Math.abs(enemy.body.x - player.body.x) > 100) {
+                        if(enemy.body.x > player.body.x) {
+                            enemy.body.setVelocityX(-50);
+                            enemy.anims.play('enemy1Left', true);
+                        }else if(enemy.body.x < player.body.x) {
+                            enemy.body.setVelocityX(50);
+                            enemy.anims.play('enemy1Right', true);
+                        }
+                    }else {
+                        if(enemy.body.x > player.body.x) {
+                            this.shotEnemy(enemy, 3.141, -11, -10, 0);
+                            enemy.anims.play('enemy1Left', true);
+                        }else if(enemy.body.x < player.body.x) {
+                            this.shotEnemy(enemy, 0, 11, -10, 0);
+                            enemy.anims.play('enemy1Right', true);
+                        }
+                        enemy.body.setVelocityX(0);
+                        enemy.anims.stop();
                     }
-                }else {
-                    enemy.body.setVelocityX(0);
-                    enemy.anims.stop();
+                }else if (enemy.texture.key === 'enemy2') {
+                    if (Math.abs(enemy.body.x - player.body.x) < 30) {
+                        this.shotEnemy(enemy, 1.570, 0, 5, 1);
+                        enemy.anims.play('enemy2', true);
+                    }
+                }else if (enemy.texture.key === 'enemy3') {
+                    if (Math.abs(enemy.body.x - player.body.x) < 100) {
+                        if(enemy.body.x > player.body.x) {
+                            this.shotEnemy(enemy, 3.141, -11, -2, 2);
+                            enemy.anims.play('enemy3', true);
+                        }
+                    }
                 }
-            } 
-        });
+            });
+        }else {
+            levelsData[0].enemies.forEach(enemy => {
+                enemy.body.setVelocityX(0);
+                enemy.anims.stop();
+            });
+        }
 
         rockets.forEach(rocket => this.rocketToTarget(rocket, player));
 
@@ -222,8 +276,8 @@ class Scene1 extends Juego {
             }
         });
         timer = Phaser.Math.Clamp(timer + delta/200, 0, 5);
-        if (ZKey.isDown) {
-            this.shotWeapon();
-        }
+        timerEnemy1 = Phaser.Math.Clamp(timerEnemy1 + delta/200, 0, 200);
+        timerEnemy2 = Phaser.Math.Clamp(timerEnemy2 + delta/200, 0, 200);
+        timerEnemy3 = Phaser.Math.Clamp(timerEnemy3 + delta/200, 0, 200);
     }
 }

@@ -11,7 +11,16 @@ class Inicio extends Phaser.Scene {
         this.load.image('bomb', 'assets/bomb.png');
         this.load.image('spark', 'assets/spark.png');
 
+        //  Pickups
+        this.load.image('heart', 'assets/vida.png');
+        this.load.image('points1', 'assets/puntos1.png');
+        this.load.image('points2', 'assets/puntos2.png');
+        this.load.image('uziPickup', 'assets/uziPickup.png');
+        this.load.image('shotgunPickup', 'assets/shotgunPickup.png');
+
+        //  Bullets
         this.load.image('bullet', 'assets/bullet.png');
+        this.load.image('bulletEnemy', 'assets/bulletEnemy.png');
 
         this.load.image('bossBody', 'assets/torso.png');
         this.load.image('node', 'assets/nodo.png');
@@ -222,8 +231,21 @@ class Inicio extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
         });
+        this.anims.create({
+            key: 'enemy2',
+            frames: this.anims.generateFrameNumbers('enemy2', { start: 0, end: 1 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'enemy3',
+            frames: this.anims.generateFrameNumbers('enemy3', { start: 0, end: 1 }),
+            frameRate: 10,
+            repeat: -1
+        });
 
         this.scene.start('Scene1');
+        levelLoaded = 0;
 
         var logo = this.add.image(400, 300, 'logo').setScale(0.26)
         logo.setInteractive()

@@ -4,18 +4,15 @@ class Fin extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('logo2D', 'assets/logo2D.png');
+
     }
 
     create() {
-        this.add.image(400, 300, 'sky');
-        this.add.image(400, 568, 'ground').setScale(2)
-        this.add.image(400, 100, 'logo2D');
+        this.add.sprite(0, 0, 'sky').setOrigin(0,0);
 
-        let puntajefinal = this.add.text(0, 0, 'Score: ' + score,  { fontFamily: 'Arial', fontSize: 70, color: '#000000' });
-        Phaser.Display.Align.In.Center(puntajefinal, this.add.zone(400, 300, 800, 600));
+        let puntajefinal = this.add.text(920, 200, 'Score: ' + stadistics.score,  { fontFamily: 'tinyUnicode', fontSize: 100, color: '#000000' });
 
-        let restartButton = this.add.text(700, 500, 'RestartWacho', { fontFamily: 'Arial', fontSize: 20, color: '#000000' })
+        let restartButton = this.add.text(920, 500, 'Restart', { fontFamily: 'tinyUnicode', fontSize: 70, color: '#000000' })
         .setInteractive()
         .on('pointerdown', () => this.scene.start('juego') );
     }
