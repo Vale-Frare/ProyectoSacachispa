@@ -19,7 +19,7 @@ class SoundScene extends Phaser.Scene {
     }
 
     stopSound(sound) {
-        this.sound.get(sound).stop();
+        if (this.sound.get(sound).length > 0) {this.sound.get(sound).stop()}
     }
 
     stopAll() {
