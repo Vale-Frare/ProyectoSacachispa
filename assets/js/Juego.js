@@ -648,7 +648,7 @@ class Juego extends Phaser.Scene {
     }
 
     getPresettedPoints(weapon) {
-        points = [
+        var points = [
             [
                 {"x": 33,"y": 46},
                 {"x": 33,"y": 11},
