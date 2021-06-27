@@ -12,7 +12,7 @@ class UiScene extends Phaser.Scene {
         fade = this.add.sprite(0, 0, 'fade').setOrigin(0,0);
         fade.alpha = 0;
         uiElements.scoreText = this.add.text(10, 10, 'Score: 0', { fontFamily: 'tinyUnicode', fontSize: '80px' }).setVisible(false);
-        uiElements.timerText = this.add.text(1700, 10, 'Timer: 100', { fontFamily: 'tinyUnicode', fontSize: '80px', align: 'right'}).setVisible(false);
+        uiElements.timerText = this.add.text(1600, 10, 'Timer: 100', { fontFamily: 'tinyUnicode', fontSize: '80px', align: 'right'}).setVisible(false);
         uiElements.lifesText = this.add.sprite(960, 30, 'heartsHud').setScale(5).setVisible(false);
         
     }
