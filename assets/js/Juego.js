@@ -113,6 +113,9 @@ class Juego extends Phaser.Scene {
                         }
                     }
                 }
+                if (playerLoadedWeapons[playerLoadedWeapons.length-1].points.length == 0) {
+                    playerLoadedWeapons[playerLoadedWeapons.length-1].points = this.getPresettedPoints(playerLoadedWeapons.length-1);
+                }
                 playerLoadedWeapons[playerLoadedWeapons.length-1].obj = this.add.sprite(0, 0, playerLoadedWeapons[playerLoadedWeapons.length-1].textureKey, 5); 
                 container.add(playerLoadedWeapons[playerLoadedWeapons.length-1].obj);
             }
@@ -592,6 +595,7 @@ class Juego extends Phaser.Scene {
         if (this.sound.get('nivel1')!=null) this.sound.get('nivel1').stop();
         if (this.sound.get('nivel2')!=null) this.sound.get('nivel2').stop();
         if (this.sound.get('transicion')!=null) this.sound.get('transicion').stop();
+        playerLoadedWeapons = [];
         gameOver = false;
         levelsData[levelLoaded] = {// Nivel 1
             spawn : { x: 0, y: 0},
@@ -641,6 +645,42 @@ class Juego extends Phaser.Scene {
         };
         rockets = [];
         map = null;
+    }
+
+    getPresettedPoints(weapon) {
+        points = [
+            [
+                {"x": 33,"y": 46},
+                {"x": 33,"y": 11},
+                {"x": 12,"y": 42},
+                {"x": 52,"y": 42},
+                {"x": 15,"y": 25},
+                {"x": 49,"y": 25},
+                {"x": 14,"y": 1},
+                {"x": 50,"y": 12}
+            ],
+            [
+                {"x": 33,"y": 54},
+                {"x": 33,"y": 3},
+                {"x": 7,"y": 45},
+                {"x": 57,"y": 45},
+                {"x": 9,"y": 25},
+                {"x": 55,"y": 25},
+                {"x": 11,"y": 7},
+                {"x": 53,"y": 7}
+            ],
+            [
+                {"x": 33,"y": 47},
+                {"x": 33,"y": 9},
+                {"x": 10,"y": 43},
+                {"x": 54,"y": 43},
+                {"x": 14,"y": 24},
+                {"x": 50,"y": 24},
+                {"x": 13,"y": 10},
+                {"x": 51,"y": 10}
+            ]
+        ]
+        return points[weapon];
     }
 
     shotWeapon() {
