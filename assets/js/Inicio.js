@@ -1,15 +1,40 @@
 class Inicio extends Phaser.Scene {
+    
     constructor() {
         super('inicio');
     }
 
     preload() {
-        this.load.image('logo', 'assets/logo.png');
+        //  Extra
+        this.load.image('fade', 'assets/fade.png');
+        this.load.image('reptiliano', 'assets/pepito.png');
+        this.load.image('secret', 'assets/secret.png');
+        this.load.spritesheet('messi', 'assets/messi.png', {frameWidth: 64, frameHeight: 59});
+
+        //  Sounds
+        this.load.audio('explosion', 'assets/sounds/Explosion.wav');
+        this.load.audio('death', 'assets/sounds/Hit_Hurt.wav');
+        this.load.audio('jump', 'assets/sounds/Jump.wav');
+        this.load.audio('points', 'assets/sounds/Pickup_Coin.wav');
+        this.load.audio('weapon', 'assets/sounds/Powerup.wav');
+        this.load.audio('shoot', 'assets/sounds/Shoot.wav');
+        this.load.audio('shootGun', 'assets/sounds/ShootGun.wav');
+
+        //  Musica
+        this.load.audio('mainmenu', 'assets/music/Sacachispas-Song.wav');
+        this.load.audio('transicion', 'assets/music/Sacachispas-Transicion.wav');
+        this.load.audio('nivel1', 'assets/music/Sacachispas-Nivel1.wav');
+        this.load.audio('nivel2', 'assets/music/Sacachispas-Nivel2.wav');
+
+        //  Escenas
+        this.load.image('cinematica2', 'assets/cutscenes/cinematica (1).png');
+        this.load.image('cinematica1', 'assets/cutscenes/cinematica (2).png');
+
+        //  Menu
         this.load.image('sky', 'assets/sky.png');
-        this.load.image('ground', 'assets/platform.png');
-        this.load.image('star', 'assets/star.png');
-        this.load.image('bomb', 'assets/bomb.png');
-        this.load.image('spark', 'assets/spark.png');
+        this.load.image('backMenu', 'assets/imagemenu.png');
+        this.load.image('buttonPlay', 'assets/button1.png');
+        this.load.image('buttonCreds', 'assets/button2.png');
 
         //  Pickups
         this.load.image('heart', 'assets/vida.png');
@@ -26,6 +51,7 @@ class Inicio extends Phaser.Scene {
         this.load.image('node', 'assets/nodo.png');
         this.load.image('parte', 'assets/parte.png');
         this.load.image('cabeza', 'assets/cabeza.png');
+        this.load.image('spark', 'assets/spark.png');
         this.load.spritesheet('cohete', 'assets/Misiles.png', {frameWidth: 32, frameHeight: 11});
 
         //  Player
@@ -46,8 +72,8 @@ class Inicio extends Phaser.Scene {
         this.load.image('robotoShoulderR', 'assets/Hombros Roboto-R.png');
         this.load.image('robotoElbowL', 'assets/Codos Roboto-L.png');
         this.load.image('robotoElbowR', 'assets/Codos Roboto-R.png');
-        this.load.image('robotoHandL', 'assets/Puños Roboto-L.png');
-        this.load.image('robotoHandR', 'assets/Puños Roboto-R.png');
+        this.load.spritesheet('robotoHandL', 'assets/Puños Roboto-L.png', {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet('robotoHandR', 'assets/Puños Roboto-R.png', {frameWidth: 32, frameHeight: 32});
         this.load.image('robotoConnector', 'assets/Conectores Roboto.png');
         this.load.spritesheet('explosion', 'assets/Explosion.png', {frameWidth: 32, frameHeight: 32});
 
@@ -57,11 +83,27 @@ class Inicio extends Phaser.Scene {
         this.load.spritesheet('enemy3', 'assets/enemy3.png', {frameWidth: 17, frameHeight: 20});
 
         this.load.image('atlas1', './assets/maps/atlas1.png');
+        this.load.image('Mapa 2-1.png', './assets/maps/Mapa 2-1.png.png')
         this.load.image('mapafondo', './assets/maps/mapafondo.png');
+        this.load.image('exitdoor', './assets/maps/exitdoor.png');
         this.load.tilemapTiledJSON('level1', './assets/maps/level1.json');
+        this.load.tilemapTiledJSON('level2', './assets/maps/level2.json');
     }
 
     create() {
+        soundManager = this.scene.get('SoundScene');
+        uiManager = this.scene.get('UIScene');
+        uiManager.fadeOut();
+        soundManager.playSound('mainmenu', true);
+
+        //  Messi anim
+        this.anims.create({
+            key: 'messi',
+            frames: this.anims.generateFrameNumbers('messi', { start: 0, end: 2 }),
+            frameRate: 4,
+            repeat: -1
+        });
+
         //  Our player animations, turning, walking left and walking right.
         this.anims.create({
             key: 'left',
@@ -244,11 +286,29 @@ class Inicio extends Phaser.Scene {
             repeat: -1
         });
 
-        this.scene.start('Scene1');
         levelLoaded = 0;
+        
+        this.initMainMenu();
+    }
 
-        var logo = this.add.image(400, 300, 'logo').setScale(0.26)
-        logo.setInteractive()
-        logo.on('pointerdown', () => this.scene.start('juego'));
+    initMainMenu() {
+        uiElements.scoreText.setVisible(false)
+        uiElements.lifesText.setVisible(false)
+        uiElements.timerText.setVisible(false)
+        mainMenu = this.add.sprite(0, 0, 'backMenu').setOrigin(0,0);
+        var buttonPlay = this.add.sprite(430, 488, 'buttonPlay').setOrigin(0,0);
+        var buttonCreds = this.add.sprite(430, 628, 'buttonCreds').setOrigin(0,0);
+        mainMenu.visible = true;
+        buttonPlay.visible = true;
+        buttonCreds.visible = true;
+        buttonPlay.setInteractive().on('pointerdown', () => {
+            mainMenu.visible = false;
+            buttonPlay.visible = false;
+            buttonCreds.visible = false;
+            soundManager.stopSound('mainmenu');
+            uiManager.fadeIn();
+            this.scene.start('Cutscene1');  
+            }
+        );
     }
 }

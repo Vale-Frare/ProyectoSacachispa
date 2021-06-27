@@ -1,7 +1,11 @@
-console.log('carga');
+let uiManager;
+let soundManager;
 let spaceKey;
 let ZKey;
 let loadingBar;
+let mainMenu;
+let spritesReptil = [];
+let reptilPicked = localStorage.getItem('reptil');
 let levelLoaded = 0;
 let stadistics = {
     timer: 100,
@@ -28,6 +32,8 @@ let levelsData = [
     }
 ]
 let boss = {
+    colliders : [],
+    timerAttack: 0,
     damage : {
         head: 0,
         leftHand: 0,
@@ -53,6 +59,7 @@ let boss = {
     target : {x: 400, y: 200},
     moving : true,
     punching: {
+        broken: {left: false, right: false},
         enabled : false,
         side : 'left',
         target : {x: 0, y: 0}
@@ -67,6 +74,7 @@ let timerEnemy3 = 0;
 let enemy3RateOfFire = 4.5;
 let camera1;
 let layer;
+let layerDoor;
 let map;
 let rockets = [];
 let playerWeapons = {
@@ -166,7 +174,6 @@ let player, playerTorso, playerLegs, playerWeapon, platforms, cursors, score = 0
 let connectors = [];
 
 window.onload = function () {
-    console.log('onload');
     config = {
         type: Phaser.AUTO,
         width: 1920,
@@ -183,11 +190,14 @@ window.onload = function () {
             default: 'arcade',
             arcade: {
                 gravity: { y: 300 },
-                debug: true
+                debug: false
             }
         },
+        audio: {
+            disableWebAudio: true
+        },
         pixelArt: true,
-        scene: [Inicio, Scene1, Fin, UiScene]
+        scene: [Inicio, Cutscene1, Scene1, Scene2, Cutscene2, Fin, UiScene, SoundScene]
     };
 
     game = new Phaser.Game(config);

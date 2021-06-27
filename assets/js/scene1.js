@@ -3,22 +3,22 @@ class Scene1 extends Juego {
         super("Scene1");
     }
     create() {
+        uiManager.fadeOut();
+        soundManager.stopAll();
         this.resetEverything();
-        //this.initLoadingBar();
+        soundManager.playSound('nivel1', true);
+
         this.createGround();
         this.loadMap();
         this.createPlayer();
         this.regenPickups();
-        this.createBoss();
+        //this.createBoss();
 
         this.initColisiones();
         this.initInputs();
-        this.initCamera();
+        this.initCamera(320,0,0,1920,1080);
 
         this.loadLevelData(1);
-        loadingBar.setVisible(false);
-
-        boss.target = levelsData[0].spawn;
     }
     update(time, delta) {   
         if (stadistics.timer <= 0) {playerTorso.anims.play('playerMuerte', true);gameOver=true};
@@ -33,6 +33,7 @@ class Scene1 extends Juego {
             if (spaceKey.isDown) {
                 if (player.body.onFloor()) {
                     player.body.setVelocityY(-180);
+                    soundManager.playSound('jump');
                 }
             }
 
@@ -148,7 +149,9 @@ class Scene1 extends Juego {
             playerLegs.anims.play('turn', true);
             playerLegs.anims.stop();
             if (playerTorso.anims.getProgress() == 1) {
-                console.log('rip');
+                soundManager.playSound('death');
+                soundManager.stopSound('nivel1');
+                uiManager.fadeIn();
                 if (stadistics.lifes <= 0) {
                     this.scene.start('fin');
                 }else {
@@ -156,69 +159,6 @@ class Scene1 extends Juego {
                 }
             }
         }
-
-        if (boss.moving) {
-            this.moveToTarget(boss.body, boss.target, 80, 250, false, 240);
-            this.moveToTarget(boss.leftArm.shoulder, {
-                x: boss.body.x - 85, 
-                y: boss.body.y - (80 + boss.shoulderOffsetY)
-            }, 80, 5)
-            this.moveToTarget(boss.leftArm.elbow, {
-                x: boss.body.x - 185, 
-                y: boss.body.y - (70 + boss.elbowOffsetY)
-            }, 80, 5)
-            this.moveToTarget(boss.rightArm.shoulder, {
-                x: boss.body.x + 85, 
-                y: boss.body.y - (80 + boss.shoulderOffsetY)
-            }, 80, 5)
-            this.moveToTarget(boss.rightArm.elbow, {
-                x: boss.body.x + 185, 
-                y: boss.body.y - (70 + boss.elbowOffsetY)
-            }, 80, 5)
-            this.moveToTarget(boss.head, {
-                x: boss.body.x, 
-                y: boss.body.y - 110
-            }, 80, 5)
-        }
-
-        if (!boss.punching.enabled) {
-            this.moveToTarget(boss.rightArm.hand, {
-                x: boss.body.x + (285 + boss.handOffsetX), 
-                y: boss.body.y + (40 + boss.handOffsetY)
-            }, 80, 15)
-            boss.rightArm.hand.rotation = 0;
-            this.moveToTarget(boss.leftArm.hand, {
-                x: boss.body.x - (285 + boss.handOffsetX), 
-                y: boss.body.y + (40 + boss.handOffsetY)
-            }, 80, 15)
-            boss.leftArm.hand.rotation = 0;
-        }else {
-            if (boss.punching.side == 'left') {
-                this.moveToTarget(boss.rightArm.hand, {
-                    x: boss.body.x + 285, 
-                    y: boss.body.y + 40
-                }, 40, 5)
-                if (this.moveToTarget(boss.leftArm.hand, {
-                    x: boss.punching.target.x, 
-                    y: boss.punching.target.y
-                }, 490, 15, true)) { this.hitFloor(); }
-            }else {
-                if (this.moveToTarget(boss.rightArm.hand, {
-                    x: boss.punching.target.x, 
-                    y: boss.punching.target.y
-                }, 490, 15, true)) { this.hitFloor(); }
-                this.moveToTarget(boss.leftArm.hand, {
-                    x: boss.body.x - 285, 
-                    y: boss.body.y + 40
-                }, 40, 5)
-            }
-        }
-        //player.rotation = Phaser.Math.Angle.BetweenPoints(player, boss.body)
-        this.connectObjects(boss.rightArm.shoulder, boss.rightArm.elbow, connectors[0]);
-        this.connectObjects(boss.rightArm.elbow, boss.rightArm.hand, connectors[1]);
-
-        this.connectObjects(boss.leftArm.shoulder, boss.leftArm.elbow, connectors[2]);
-        this.connectObjects(boss.leftArm.elbow, boss.leftArm.hand, connectors[3]);
 
         //  Enemies AI
         if (!gameOver) {
@@ -263,10 +203,7 @@ class Scene1 extends Juego {
                 enemy.anims.stop();
             });
         }
-
-        rockets.forEach(rocket => this.rocketToTarget(rocket, player));
-
-        boss.target = {x:player.body.x, y: 830};
+        
         playerLoadedWeapons.forEach(function(weapon) {
             weapon.obj.setFrame(playerWeapons.side);
             if (playerWeapons.equipped == weapon.textureKey) {

@@ -8,19 +8,42 @@ class Juego extends Phaser.Scene {
         platforms.create(3400, 568, 'ground').setScale(2).refreshBody();
     }
 
-    loadMap() {
-        map = this.make.tilemap({ key: 'level1', tileWidth: 32, tileHeight:8 });
+    loadMap(level = 1) {
+        map = this.make.tilemap({ key: `level${level}`, tileWidth: 32, tileHeight:8 });
         var tileset = map.addTilesetImage('atlas1');
-        var tilesetBackground = map.addTilesetImage('mapafondo');
+        var tilesetdoor = map.addTilesetImage('exitdoor');
+        var tilesetBackground = [map.addTilesetImage('mapafondo'), map.addTilesetImage('Mapa 2-1.png')][level-1];
         var layerBack = map.createLayer("background", tilesetBackground);
+        if (level == 1) {layerDoor = map.createLayer("door", tilesetdoor);}
         layer = map.createLayer("platforms", tileset);
 
         var spritesSpawn = map.createFromObjects("objects", {
-            name: 'spawn'
+            name: 'spawn',
+            width: 1,
+            height: 1,
+            visible: false
         });
+        spritesSpawn[0].visible = false;
         var spritesJefes = map.createFromObjects("objects", {
             name: 'jefe'
         });
+        var spritesMessi = map.createFromObjects("objects", {
+            name: 'messi'
+        });
+        if (reptilPicked == null || reptilPicked == "null") {
+            spritesReptil = map.createFromObjects("objects", {
+                name: 'reptiliano',
+                key: 'reptiliano'
+            });
+            if (spritesReptil.length > 0) {
+                this.physics.world.enable(spritesReptil[0]);
+                spritesReptil[0].body.immovable = true;
+                spritesReptil[0].body.allowGravity = false;
+            }
+        }
+        if (spritesMessi.length > 0) {
+            spritesMessi[0].anims.play('messi');
+        }
         var spritesPickups = map.createFromObjects("objects", {
             name: 'pickup',
             visible: false
@@ -61,11 +84,14 @@ class Juego extends Phaser.Scene {
             levelsData[levelLoaded].enemies.push(element);
         });
 
-        spritesSpawn[0].visible = false;
-        levelsData[levelLoaded].spawn = {x: spritesSpawn[0].x, y: spritesSpawn[0].y};
-        spritesJefes[0].visible = false;
-        boss.spawn = {x: spritesJefes[0].x, y: spritesJefes[0].y};
-
+        
+        levelsData[level-1].spawn = {x: spritesSpawn[0].x, y: spritesSpawn[0].y};
+        if (spritesJefes.length > 0) {
+            spritesJefes[0].visible = false;
+            boss.spawn = {x: spritesJefes[0].x, y: spritesJefes[0].y};
+        }
+        
+        if (level == 1) {layerDoor.setCollisionByProperty({ exit: true });}
         layer.setCollisionByProperty({ collides: true });
     }
 
@@ -79,7 +105,6 @@ class Juego extends Phaser.Scene {
                             var color = this.textures.getPixel(x, y, playerLoadedWeapons[playerLoadedWeapons.length-1].textureKey, i);
                             if (color != null) {
                                 if (color._rgba == "rgba(48,50,48,1)") {
-                                    console.log(color._rgba);
                                     playerLoadedWeapons[playerLoadedWeapons.length-1].points.push({x: x, y: y});
                                     x = 65;
                                     y = 65;
@@ -88,7 +113,6 @@ class Juego extends Phaser.Scene {
                         }
                     }
                 }
-                console.log(playerLoadedWeapons[playerLoadedWeapons.length-1]);
                 playerLoadedWeapons[playerLoadedWeapons.length-1].obj = this.add.sprite(0, 0, playerLoadedWeapons[playerLoadedWeapons.length-1].textureKey, 5); 
                 container.add(playerLoadedWeapons[playerLoadedWeapons.length-1].obj);
             }
@@ -109,6 +133,7 @@ class Juego extends Phaser.Scene {
 
         //  Player physics properties. Give the little guy a slight bounce.
         player.body.setCollideWorldBounds(true);
+        playerWeapons.side = 5;
     }
 
     createBoss() {
@@ -139,17 +164,23 @@ class Juego extends Phaser.Scene {
         boss.head.anims.play('robotoHead', true);
     }
 
-    initColisiones() {
+    initColisiones(bossB = false, door = true) {
         //  Collide the player with the platforms
         this.physics.add.collider(player, platforms);
         this.physics.add.collider(player, layer);
-        this.physics.add.collider(player, boss.body);
         this.physics.add.collider(player, levelsData[levelLoaded].enemies);
-        this.physics.add.collider(boss.rightArm.hand, platforms, this.hitFloor, null, this);
-        this.physics.add.collider(boss.leftArm.hand, platforms, this.hitFloor, null, this);
-        this.physics.add.collider(boss.rightArm.hand, player, this.hitPlayer, null, this);
-        this.physics.add.collider(boss.leftArm.hand, player, this.hitPlayer, null, this);
-        
+        if (spritesReptil.length > 0) {
+            this.physics.add.collider(spritesReptil[0], player, this.pickup100Points, null, this);
+        }
+        if (bossB) {
+            boss.colliders.push(this.physics.add.collider(boss.rightArm.hand, platforms, this.hitFloor, null, this));
+            boss.colliders.push(this.physics.add.collider(boss.leftArm.hand, platforms, this.hitFloor, null, this));
+            boss.colliders.push(this.physics.add.collider(boss.rightArm.hand, player, this.hitPlayer, null, this));
+            boss.colliders.push(this.physics.add.collider(boss.leftArm.hand, player, this.hitPlayer, null, this));
+        }
+        if (door) {
+            this.physics.add.collider(player, layerDoor, this.goLevel, null, this);
+        }
     }
 
     initInputs() {
@@ -169,98 +200,6 @@ class Juego extends Phaser.Scene {
         }, this);
 
         ZKey = this.input.keyboard.addKey('Z');
-
-        //  Prueba de colisiones
-        var OneKey = this.input.keyboard.addKey('Q');
-        OneKey.on('down', function () {
-            if (playerWeapons.equipped == 'uzi') {
-                this.switchWeapon('pistol');
-            }else
-            if (playerWeapons.equipped == 'pistol') {
-                this.switchWeapon('shotgun');
-            }else
-            if (playerWeapons.equipped == 'shotgun') {
-                this.switchWeapon('uzi');
-            }
-        }, this);
-
-        //  Prueba de colisiones
-        var BKey = this.input.keyboard.addKey('B');
-        BKey.on('down', function () {
-            this.initColisiones();
-        }, this);
-
-        //  Prueba de ataque
-        var CKey = this.input.keyboard.addKey('C');
-        CKey.on('down', function () {
-            this.bossAttack(0);
-        }, this);
-
-        //  Prueba de cohetes
-        var VKey = this.input.keyboard.addKey('V');
-        VKey.on('down', function () {
-            this.evaluateAttackSide();
-            if (boss.punching.side == 'left') {
-                var rocket = {
-                    obj : this.physics.add.sprite(boss.leftArm.shoulder.x, boss.leftArm.shoulder.y-20, 'cohete'),
-                    particles : this.add.particles('spark'),
-                    get emitter() {
-                        this.particles.createEmitter({
-                            follow: this.obj,
-                            radial: false,
-                            x: 100,
-                            y: { start: 0, end: 560, steps: 256 },
-                            lifespan: 2000,
-                            quantity: 4,
-                            gravityY: -50,
-                            scale: { start: 2, end: 0, ease: 'Power3' },
-                            blendMode: 'ADD'
-                        })
-                    }
-                }
-                rocket.emitter;
-                rocket.obj.setGravity(0, -300);
-                rocket.obj.setRotation(-1.57);
-                rocket.obj.anims.play('misiles');
-                rockets.push(rocket);
-                this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
-                this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
-            }else {
-                var rocket = {
-                    obj : this.physics.add.sprite(boss.rightArm.shoulder.x, boss.rightArm.shoulder.y-20, 'cohete'),
-                    particles : this.add.particles('spark'),
-                    get emitter() {
-                        this.particles.createEmitter({
-                            follow: this.obj,
-                            radial: false,
-                            x: 100,
-                            y: { start: 0, end: 560, steps: 256 },
-                            lifespan: 2000,
-                            quantity: 4,
-                            gravityY: -50,
-                            scale: { start: 2, end: 0, ease: 'Power3' },
-                            blendMode: 'ADD'
-                        })
-                    }
-                }
-                rocket.emitter;
-                rocket.obj.setGravity(0, -300);
-                rocket.obj.setRotation(-1.57);
-                rocket.obj.anims.play('misiles');
-                rockets.push(rocket);
-                this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
-                this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
-            }
-        }, this);
-
-        //  Mandar roboto a target
-        this.input.on('pointerup', function (pointer) {
-            if (pointer.leftButtonReleased()) {
-                Juego.prototype.setTarget(
-                    Phaser.Math.FloorTo(game.input.mousePointer.x),
-                    Phaser.Math.FloorTo(game.input.mousePointer.y));
-            }
-        });
 
     }
 
@@ -345,9 +284,9 @@ class Juego extends Phaser.Scene {
     }
 
     bulletHitEnemy(bullet, hitted) {
-        console.log(hitted);
         var explosion = this.add.sprite(hitted.x, hitted.y, 'explosion');
         explosion.anims.play('explosion', true);
+        soundManager.playSound('explosion');
         levelsData[levelLoaded].enemies.splice(levelsData[levelLoaded].enemies.indexOf(hitted), 1);
         hitted.destroy();
         bullet.destroy();
@@ -389,9 +328,67 @@ class Juego extends Phaser.Scene {
                     y: player.body.y 
                 };
                 //  Ataca
-                boss.punching.enabled = true;
+                if (boss.punching.broken.left && boss.punching.side == 'left') {
+
+                }else if (boss.punching.broken.right && boss.punching.side == 'right') {
+                    
+                }else {
+                    boss.punching.enabled = true;
+                }
                 break;
-        
+            case 1:
+                this.evaluateAttackSide();
+                if (boss.punching.side == 'left') {
+                    var rocket = {
+                        obj : this.physics.add.sprite(boss.leftArm.shoulder.x, boss.leftArm.shoulder.y-20, 'cohete'),
+                        particles : this.add.particles('spark'),
+                        get emitter() {
+                            this.particles.createEmitter({
+                                follow: this.obj,
+                                radial: false,
+                                x: 100,
+                                y: { start: 0, end: 560, steps: 256 },
+                                lifespan: 2000,
+                                quantity: 4,
+                                gravityY: -50,
+                                scale: { start: 2, end: 0, ease: 'Power3' },
+                                blendMode: 'ADD'
+                            })
+                        }
+                    }
+                    rocket.emitter;
+                    rocket.obj.setGravity(0, -300);
+                    rocket.obj.setRotation(-1.57);
+                    rocket.obj.anims.play('misiles');
+                    rockets.push(rocket);
+                    this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
+                    this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
+                }else {
+                    var rocket = {
+                        obj : this.physics.add.sprite(boss.rightArm.shoulder.x, boss.rightArm.shoulder.y-20, 'cohete'),
+                        particles : this.add.particles('spark'),
+                        get emitter() {
+                            this.particles.createEmitter({
+                                follow: this.obj,
+                                radial: false,
+                                x: 100,
+                                y: { start: 0, end: 560, steps: 256 },
+                                lifespan: 2000,
+                                quantity: 4,
+                                gravityY: -50,
+                                scale: { start: 2, end: 0, ease: 'Power3' },
+                                blendMode: 'ADD'
+                            })
+                        }
+                    }
+                    rocket.emitter;
+                    rocket.obj.setGravity(0, -300);
+                    rocket.obj.setRotation(-1.57);
+                    rocket.obj.anims.play('misiles');
+                    rockets.push(rocket);
+                    this.physics.add.collider(player, rocket.obj, this.rocketHitPlayer, null, this);
+                    this.physics.add.collider(layer, rocket.obj, this.rocketHitPlatform, null, this);
+                }
             default:
                 break;
         }
@@ -401,6 +398,7 @@ class Juego extends Phaser.Scene {
         if(gameOver) {return;}
         var explosion = this.add.sprite(player.x, player.y, 'explosion');
         explosion.anims.play('explosion', true);
+        soundManager.playSound('explosion');
         playerTorso.anims.play('playerMuerte', true);
         stadistics.lifes -= 1;
         gameOver = true;
@@ -409,7 +407,7 @@ class Juego extends Phaser.Scene {
     rocketHitPlayer(player, rocket) {
         var explosion = this.add.sprite(rocket.x, rocket.y, 'explosion');
         explosion.anims.play('explosion', true);
-        console.log("Golpe al jugador");
+        soundManager.playSound('explosion');
         rockets.forEach(function(rckt) {
             if (rckt.obj == rocket) {
                 rockets.splice(rockets.indexOf(rckt), 1);
@@ -425,6 +423,7 @@ class Juego extends Phaser.Scene {
     bulletHitPlayer(player, bullet) {
         var explosion = this.add.sprite(bullet.x, bullet.y, 'explosion');
         explosion.anims.play('explosion', true);
+        soundManager.playSound('explosion');
         bullet.destroy();
         playerTorso.anims.play('playerMuerte', true);
         stadistics.lifes -= 1;
@@ -435,12 +434,14 @@ class Juego extends Phaser.Scene {
     bulletHitFloor(bullet) {
         var explosion = this.add.sprite(bullet.x, bullet.y, 'explosion').setScale(0.2);
         explosion.anims.play('explosion', true);
+        soundManager.playSound('explosion');
         bullet.destroy();
     }
 
     rocketHitPlatform(rocket, platform) {
         var explosion = this.add.sprite(rocket.x, rocket.y, 'explosion');
         explosion.anims.play('explosion', true);
+        soundManager.playSound('explosion');
         rockets.forEach(function(rckt) {
             if (rckt.obj == rocket) {
                 rockets.splice(rockets.indexOf(rckt), 1);
@@ -492,40 +493,65 @@ class Juego extends Phaser.Scene {
     }
 
     pickupLife(pickup) {
-        if (stadistics.life == 3) {pickup.destroy();return;}
-        stadistics.lifes += 1;
-        pickup.destroy();
+        if (stadistics.lifes == 3) {
+            soundManager.playSound('points');
+            stadistics.score += 50;
+            pickup.destroy();
+            return;
+        }else {
+            soundManager.playSound('points');
+            stadistics.lifes += 1;
+            pickup.destroy();
+        }
     }
 
     pickupTenPoints(pickup) {
+        soundManager.playSound('points');
         stadistics.score += 10;
         pickup.destroy();
     }
 
+    pickup100Points(pickup) {
+        uiManager.fadeIn();
+        soundManager.playSound('points');
+        soundManager.playSound('points');
+        soundManager.playSound('points');
+        stadistics.score += 100;
+        pickup.destroy();
+        reptilPicked = true;
+        localStorage.setItem('reptil', true);
+        uiManager.secret();
+        uiManager.fadeOut();
+    }
+
     pickupTwentyPoints(pickup) {
+        soundManager.playSound('points');
         stadistics.score += 20;
         pickup.destroy();
     }
 
     pickupUzi(pickup) {
+        soundManager.playSound('weapon');
         this.switchWeapon('uzi');
         pickup.destroy();
     }
 
     pickupShotgun(pickup) {
+        soundManager.playSound('weapon');
         this.switchWeapon('shotgun');
         pickup.destroy();
     }
 
-    initCamera() {
+    initCamera(scrollY = 320, x1 = 160, y1 = 130, x2 = 1210, y2 = 1080) {
         camera1 = this.cameras.add(0, 0, 400, 300).setZoom(0.5);
 
         camera1.startFollow(player, false, 0.5, 0);
+        camera1.setBounds(x1, y1, x2, y2);
 
         camera1.width = 1920;
         camera1.height = 1080;
         camera1.scrollX = -100;
-        camera1.scrollY = 360;
+        camera1.scrollY = scrollY;
         //  435
         camera1.zoom = 3;
         camera1.setBackgroundColor('rgba(0, 0, 0, 1)');
@@ -534,6 +560,7 @@ class Juego extends Phaser.Scene {
     loadLevelData(lvl) {
         player.x = levelsData[lvl-1].spawn.x;
         player.y = levelsData[lvl-1].spawn.y;
+        levelLoaded = lvl-1;
     }
 
     switchWeapon(weaponId) {
@@ -562,7 +589,9 @@ class Juego extends Phaser.Scene {
     }
 
     resetEverything() {
-        loadingBar.setVisible(true);
+        if (this.sound.get('nivel1')!=null) this.sound.get('nivel1').stop();
+        if (this.sound.get('nivel2')!=null) this.sound.get('nivel2').stop();
+        if (this.sound.get('transicion')!=null) this.sound.get('transicion').stop();
         gameOver = false;
         levelsData[levelLoaded] = {// Nivel 1
             spawn : { x: 0, y: 0},
@@ -572,6 +601,8 @@ class Juego extends Phaser.Scene {
         };
         connectors = [];
         boss = {
+            colliders : [],
+            timerAttack: 0,
             damage : {
                 head: 0,
                 leftHand: 0,
@@ -597,6 +628,7 @@ class Juego extends Phaser.Scene {
             target : {x: 400, y: 200},
             moving : true,
             punching: {
+                broken: {left: false, right: false},
                 enabled : false,
                 side : 'left',
                 target : {x: 0, y: 0}
@@ -605,8 +637,10 @@ class Juego extends Phaser.Scene {
         stadistics = {
             timer: 100,
             score: 0,
-            lifes: 3,
+            lifes: stadistics.lifes,
         };
+        rockets = [];
+        map = null;
     }
 
     shotWeapon() {
@@ -621,6 +655,7 @@ class Juego extends Phaser.Scene {
                 this.physics.add.collider(bala, boss.head, this.bulletHit, null, this);
                 this.physics.add.collider(bala, levelsData[levelLoaded].enemies, this.bulletHitEnemy, null, this);
                 this.physics.add.collider(bala, layer, this.bulletHitFloor, null, this);
+                soundManager.playSound('shootGun');
             }
             timer = 0;
             playerLoadedWeapons.forEach(weapon => {
@@ -638,6 +673,7 @@ class Juego extends Phaser.Scene {
             bala.rotation = rotation;
             this.physics.velocityFromRotation(bala.rotation, 200, bala.body.velocity);
             this.physics.add.collider(player, bala, this.bulletHitPlayer, null, this);
+            soundManager.playSound('shoot');
             switch (timer) {
                 case 0:
                     timerEnemy1 = 0;
@@ -651,6 +687,18 @@ class Juego extends Phaser.Scene {
                 default:
                     break;
             }
+        }
+    }
+
+    randomAttack() {
+        this.bossAttack(Phaser.Math.Between(0, 1));
+    }
+
+    goLevel() {
+        if (levelLoaded == 0) {
+            uiManager.fadeIn();
+            soundManager.stopSound('nivel1');
+            this.scene.start('Scene2');
         }
     }
 
